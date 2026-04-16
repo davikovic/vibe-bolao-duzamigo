@@ -2,6 +2,7 @@ import { GameCard } from "@/components/game-card";
 import db from "@/lib/db";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { Trophy, Timer, Zap, Flame } from "lucide-react";
 
 const MOCK_GAMES = [
   {
@@ -41,12 +42,10 @@ export default async function Home() {
   try {
     const session = await getServerSession(authOptions);
 
-    // Busca matches do banco de dados
     const result = await db("matches").select("*").orderBy("date", "asc");
     if (result && result.length > 0) {
       matches = result;
 
-      // Se usuário logado, busca os seus palpites
       if (session?.user?.email) {
         const user = await db("users").where({ email: session.user.email }).first();
         if (user) {
@@ -60,62 +59,118 @@ export default async function Home() {
       matches = MOCK_GAMES;
     }
   } catch (error) {
-    console.error("Erro ao conectar no banco, usando MOCK_GAMES:", error);
     dbError = true;
-    matches = MOCK_GAMES; // usa mock como fallback
+    matches = MOCK_GAMES;
   }
 
+  // Encontra o primeiro jogo que ainda não começou para o Hero
+  const now = new Date();
+  const heroMatch = matches.find(m => new Date(m.date) > now && m.score_a === null) || matches[0];
+  const otherMatches = matches.filter(m => m.id !== heroMatch.id);
+
+  const formatDate = (dateInput: any) => {
+    const d = typeof dateInput === "string" ? new Date(dateInput) : dateInput;
+    return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+  };
+
   return (
-    <div className="flex flex-col p-4 pb-16 space-y-6">
-      <header className="py-6">
-        <h1 className="text-4xl font-extrabold tracking-tight text-white drop-shadow-md">
-          Próximos Jogos
-        </h1>
-        <p className="text-sm text-green-100 font-medium py-1 drop-shadow-sm">
-          Deixe seu palpite e boa sorte!
-        </p>
-      </header>
-
-      {dbError && (
-        <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-md shadow">
-          <p className="text-sm text-yellow-700">
-            <strong>Aviso:</strong> Não foi possível conectar ao banco de dados. Exibindo jogos de demonstração.
-            Rode `npx knex migrate:latest` e `npx knex seed:run` para testar localmente.
-          </p>
+    <div className="flex flex-col gap-10 py-6 px-4 md:px-0">
+      {/* Hero Section - Próximo Grande Jogo */}
+      <section className="relative w-full overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-yellow-600/20 via-black to-black border border-white/5 p-8 md:p-12">
+        <div className="absolute top-0 right-0 p-8 opacity-10">
+           <Trophy size={180} className="text-yellow-500 rotate-12" />
         </div>
-      )}
+        
+        <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-10">
+           <div className="flex flex-col max-w-md text-center md:text-left">
+              <div className="flex items-center justify-center md:justify-start gap-2 mb-4">
+                 <div className="bg-yellow-500 px-3 py-1 rounded-full text-[10px] font-black text-black uppercase tracking-widest flex items-center gap-1">
+                    <Zap size={10} fill="black" /> Destaque da Rodada
+                 </div>
+                 <div className="text-gray-400 text-xs font-bold uppercase tracking-wider">{heroMatch.group_name}</div>
+              </div>
+              
+              <h1 className="text-4xl md:text-6xl font-black text-white mb-4 tracking-tighter leading-tight">
+                É HORA DO <span className="text-yellow-500 gold-glow underline decoration-yellow-500/30 underline-offset-8">SHOW.</span>
+              </h1>
+              
+              <p className="text-gray-400 font-medium mb-8">
+                O clássico está chegando. Garanta sua posição no ranking com o seu melhor palpite!
+              </p>
 
-      <div className="flex flex-col gap-5">
-        {matches.map((game) => {
-          // Formata data e hora manual para evitar deps extras
-          const gameDate = typeof game.date === "string" ? new Date(game.date) : game.date;
-          const day = String(gameDate.getDate()).padStart(2, '0');
-          const month = String(gameDate.getMonth() + 1).padStart(2, '0');
-          const hours = String(gameDate.getHours()).padStart(2, '0');
-          const minutes = String(gameDate.getMinutes()).padStart(2, '0');
-          const dateStr = `${day}/${month} ${hours}:${minutes}`;
+              <div className="flex items-center justify-center md:justify-start gap-4">
+                 <div className="flex flex-col">
+                    <span className="text-[10px] font-bold text-gray-500 uppercase mb-1">Inicia em</span>
+                    <div className="flex items-center gap-2 text-2xl font-black text-white">
+                       <Timer size={20} className="text-yellow-500" />
+                       {formatDate(heroMatch.date).split(' ')[1]}
+                    </div>
+                 </div>
+              </div>
+           </div>
 
-          const isLocked = new Date() > gameDate;
-          const isFinished = game.score_a !== null && game.score_b !== null;
+           <div className="w-full md:w-auto min-w-[320px] md:min-w-[420px]">
+              <GameCard
+                id={String(heroMatch.id)}
+                date={formatDate(heroMatch.date)}
+                group={heroMatch.group_name}
+                teamA={{ id: heroMatch.team_a, name: heroMatch.team_a, flag: heroMatch.team_a_flag }}
+                teamB={{ id: heroMatch.team_b, name: heroMatch.team_b, flag: heroMatch.team_b_flag }}
+                initialGuessA={userGuessesMap[heroMatch.id]?.a}
+                initialGuessB={userGuessesMap[heroMatch.id]?.b}
+                isLocked={new Date() > new Date(heroMatch.date)}
+                isFinished={heroMatch.score_a !== null}
+                finalScoreA={heroMatch.score_a}
+                finalScoreB={heroMatch.score_b}
+              />
+           </div>
+        </div>
+      </section>
 
-          return (
-            <GameCard
-              key={game.id}
-              id={String(game.id)}
-              date={dateStr}
-              group={game.group_name}
-              teamA={{ id: game.team_a, name: game.team_a, flag: game.team_a_flag }}
-              teamB={{ id: game.team_b, name: game.team_b, flag: game.team_b_flag }}
-              initialGuessA={userGuessesMap[game.id]?.a}
-              initialGuessB={userGuessesMap[game.id]?.b}
-              isLocked={isLocked}
-              isFinished={isFinished}
-              finalScoreA={game.score_a}
-              finalScoreB={game.score_b}
-            />
-          );
-        })}
-      </div>
+      {/* Grid de Outros Jogos */}
+      <section className="space-y-6">
+        <div className="flex items-center justify-between px-2">
+           <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center border border-white/5">
+                 <Flame className="text-orange-500" />
+              </div>
+              <h2 className="text-2xl font-black text-white uppercase tracking-tight">Próximas Partidas</h2>
+           </div>
+           <button className="text-[10px] font-black uppercase tracking-widest text-yellow-500/60 hover:text-yellow-500 transition-colors">Ver Todos</button>
+        </div>
+
+        {dbError && (
+          <div className="bg-yellow-500/10 border border-yellow-500/20 p-4 rounded-3xl text-yellow-500 text-xs font-bold text-center">
+            Usando dados de demonstração. Conecte seu banco de dados para ativar o sistema real.
+          </div>
+        )}
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+          {otherMatches.map((game) => {
+            const gameDate = typeof game.date === "string" ? new Date(game.date) : game.date;
+            const dateStr = formatDate(gameDate);
+            const isLocked = new Date() > gameDate;
+            const isFinished = game.score_a !== null && game.score_b !== null;
+
+            return (
+              <GameCard
+                key={game.id}
+                id={String(game.id)}
+                date={dateStr}
+                group={game.group_name}
+                teamA={{ id: game.team_a, name: game.team_a, flag: game.team_a_flag }}
+                teamB={{ id: game.team_b, name: game.team_b, flag: game.team_b_flag }}
+                initialGuessA={userGuessesMap[game.id]?.a}
+                initialGuessB={userGuessesMap[game.id]?.b}
+                isLocked={isLocked}
+                isFinished={isFinished}
+                finalScoreA={game.score_a}
+                finalScoreB={game.score_b}
+              />
+            );
+          })}
+        </div>
+      </section>
     </div>
   );
 }

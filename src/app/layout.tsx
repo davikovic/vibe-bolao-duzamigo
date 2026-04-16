@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { BottomNav } from "@/components/layout/bottom-nav";
+import { Sidebar } from "@/components/layout/sidebar";
 import { Toaster } from "@/components/ui/sonner";
 
 const geistSans = Geist({
@@ -15,8 +16,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Bolão Duzamigo",
-  description: "Bolão da copa entre amigos",
+  title: "BOLÃO DUZAMIGO | World Cup 2026",
+  description: "O dashboard de apostas definitivo da Copa",
 };
 
 export default function RootLayout({
@@ -28,16 +29,25 @@ export default function RootLayout({
     <html
       lang="pt-BR"
       suppressHydrationWarning
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased dark`}
     >
-      <body className="min-h-full flex flex-col items-center bg-gradient-to-br from-emerald-800 via-green-600 to-yellow-500 dark:from-green-950 dark:via-green-900 dark:to-yellow-900">
-        <div className="w-full max-w-md bg-white dark:bg-gray-950 min-h-screen flex flex-col relative shadow-[0_0_50px_rgba(0,0,0,0.3)] border-x border-green-700 dark:border-green-950 overflow-x-hidden">
-          <main className="flex-1">
+      <body className="min-h-full flex flex-col md:flex-row bg-[#0a0a0a] text-white">
+        {/* Sidebar Desktop */}
+        <Sidebar />
+
+        {/* Main Content Area */}
+        <div className="flex-1 flex flex-col relative min-h-screen">
+          <main className="flex-1 w-full max-w-7xl mx-auto md:px-8 pb-20 md:pb-10">
             {children}
           </main>
-          <BottomNav />
+          
+          {/* Mobile Navigation */}
+          <div className="md:hidden">
+            <BottomNav />
+          </div>
         </div>
-        <Toaster position="top-center" richColors />
+        
+        <Toaster position="top-center" richColors theme="dark" />
       </body>
     </html>
   );

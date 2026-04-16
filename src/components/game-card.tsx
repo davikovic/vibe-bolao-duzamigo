@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { saveGuess } from "@/app/actions/guess";
-import { Check, Loader2, Lock } from "lucide-react";
+import { Check, Loader2, Lock, Shield, Target, Calendar } from "lucide-react";
 
 export interface Team {
   id: string;
@@ -37,7 +37,7 @@ export function GameCard({
 
   const handleSave = async () => {
     if (guessA === "" || guessB === "") {
-      toast.error("Preencha o placar para ambos os times!");
+      toast.error("Preencha o placar!");
       return;
     }
 
@@ -48,7 +48,7 @@ export function GameCard({
     if (result.error) {
       toast.error(result.error);
     } else {
-      toast.success(result.message || "Palpite salvo com sucesso! ⚽");
+      toast.success(result.message || "Palpite registrado! ⚡");
     }
   };
 
@@ -57,111 +57,126 @@ export function GameCard({
 
   return (
     <motion.div 
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      whileHover={!actuallyLocked ? { scale: 1.02 } : {}}
-      transition={{ type: "spring", stiffness: 300, damping: 20 }}
-      className={`bg-white dark:bg-gray-900 border rounded-2xl p-4 shadow-sm relative overflow-hidden transition-all ${
-        isFinished 
-          ? 'opacity-70 border-gray-200 dark:border-gray-800 grayscale-[0.3]' 
-          : actuallyLocked 
-            ? 'opacity-85 border-gray-100 dark:border-gray-800' 
-            : 'border-gray-100 dark:border-gray-800 shadow-[0_8px_30px_rgb(0,0,0,0.04)]'
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={{ opacity: 1, scale: 1 }}
+      whileHover={!actuallyLocked ? { y: -5, borderColor: "rgba(234,179,8,0.3)" } : {}}
+      className={`group relative bg-[#121212]/60 backdrop-blur-xl border border-white/5 rounded-[2rem] p-6 transition-all duration-300 ${
+        actuallyLocked ? 'opacity-80' : 'hover:shadow-[0_20px_40px_rgba(0,0,0,0.4)]'
       }`}
     >
-      <div className="flex justify-center mb-4">
-        {isFinished ? (
-          <span className="text-[10px] font-bold tracking-widest text-white uppercase bg-gray-500 dark:bg-gray-700 px-3 py-1 rounded-full flex items-center gap-1.5">
-            <Lock size={10} /> Jogo Encerrado
-          </span>
-        ) : (
-          <span className="text-xs font-semibold tracking-wider text-gray-500 uppercase bg-gray-100 dark:bg-gray-800 px-3 py-1 rounded-full">
-            {group} • {date}
-          </span>
-        )}
+      {/* Background Glow Effect */}
+      <div className="absolute inset-0 bg-gradient-to-br from-yellow-500/5 to-transparent rounded-[2rem] -z-10" />
+
+      {/* Header Info */}
+      <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center gap-2">
+           <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center">
+             <Shield className="w-4 h-4 text-yellow-500" />
+           </div>
+           <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">{group}</span>
+        </div>
+        
+        <div className="flex items-center gap-2 px-3 py-1 bg-white/5 rounded-full border border-white/5">
+           <Calendar className="w-3 h-3 text-yellow-500/50" />
+           <span className="text-[10px] font-bold text-gray-400">{date}</span>
+        </div>
       </div>
 
-      <div className="flex items-center justify-between gap-2 mb-2">
+      <div className="flex items-center justify-between gap-6 relative">
         {/* Team A */}
-        <div className="flex flex-col items-center flex-1">
-          <div className="w-12 h-12 flex items-center justify-center text-4xl mb-2 drop-shadow-md">
-            {teamA.flag}
+        <div className="flex flex-col items-center flex-1 space-y-3">
+          <div className="relative group/flag">
+            <div className="absolute -inset-2 bg-yellow-500/20 rounded-full blur-xl opacity-0 group-hover/flag:opacity-100 transition-opacity" />
+            <span className="text-5xl drop-shadow-2xl relative z-10">{teamA.flag}</span>
           </div>
-          <span className="font-bold text-sm text-gray-800 dark:text-gray-200 text-center uppercase tracking-wide line-clamp-1">
+          <span className="font-black text-xs text-white uppercase tracking-tighter text-center">
             {teamA.name}
           </span>
         </div>
 
-        {/* Score Area */}
-        <div className="flex flex-col items-center gap-2">
-          {isFinished && (
-            <div className="text-[10px] font-black text-gray-400 uppercase tracking-tighter mb-1">Resultado Real</div>
-          )}
-          <div className="flex items-center gap-3 bg-gray-50 dark:bg-gray-950 p-2 rounded-xl border border-gray-100 dark:border-gray-800">
-            {isFinished ? (
-              <div className="flex items-center gap-4 px-2">
-                <span className="text-3xl font-black text-gray-900 dark:text-white">{finalScoreA}</span>
-                <span className="text-gray-400 font-bold text-sm">X</span>
-                <span className="text-3xl font-black text-gray-900 dark:text-white">{finalScoreB}</span>
-              </div>
-            ) : (
-              <>
+        {/* Competition Verses */}
+        <div className="flex flex-col items-center justify-center min-w-[120px]">
+          {isFinished ? (
+            <div className="flex flex-col items-center gap-1">
+               <span className="text-[8px] font-black uppercase text-yellow-500 tracking-[0.2em] mb-1">Finalizado</span>
+               <div className="flex items-center gap-4 bg-black/40 px-4 py-2 rounded-2xl border border-white/5 shrink-0">
+                  <span className="text-3xl font-black text-white">{finalScoreA}</span>
+                  <span className="text-yellow-500 text-sm font-bold">:</span>
+                  <span className="text-3xl font-black text-white">{finalScoreB}</span>
+               </div>
+               <div className="mt-4 flex flex-col items-center">
+                  <span className="text-[8px] font-bold text-gray-500 uppercase">Seu Palpite</span>
+                  <span className="text-[10px] font-black text-gray-400">{guessA || 0} x {guessB || 0}</span>
+               </div>
+            </div>
+          ) : (
+            <div className="flex flex-col items-center gap-4">
+              <div className="flex items-center gap-2 bg-black/20 p-1.5 rounded-2xl border border-white/5 shadow-inner">
                 <Input 
                   type="number" 
                   value={guessA}
                   onChange={(e) => setGuessA(e.target.value)}
                   disabled={actuallyLocked || isSaving}
-                  className="w-14 h-14 text-center text-2xl font-bold bg-white dark:bg-gray-900 border-none shadow-sm focus-visible:ring-blue-500 disabled:opacity-100 transition-all"
-                  placeholder="-"
+                  className="w-12 h-12 text-center text-xl font-black bg-white/5 border-none focus-visible:ring-yellow-500 disabled:opacity-100 rounded-xl"
+                  placeholder="?"
                 />
-                <span className="text-gray-400 font-medium select-none">X</span>
+                <div className="w-1 h-1 bg-yellow-500/50 rounded-full" />
                 <Input 
                   type="number" 
                   value={guessB}
                   onChange={(e) => setGuessB(e.target.value)}
                   disabled={actuallyLocked || isSaving}
-                  className="w-14 h-14 text-center text-2xl font-bold bg-white dark:bg-gray-900 border-none shadow-sm focus-visible:ring-blue-500 disabled:opacity-100 transition-all"
-                  placeholder="-"
+                  className="w-12 h-12 text-center text-xl font-black bg-white/5 border-none focus-visible:ring-yellow-500 disabled:opacity-100 rounded-xl"
+                  placeholder="?"
                 />
-              </>
-            )}
-          </div>
-          {isFinished && (
-            <div className="mt-2 flex flex-col items-center">
-               <div className="text-[9px] font-bold text-gray-400 uppercase tracking-tighter bg-gray-100 dark:bg-gray-800 px-2 py-0.5 rounded">Seu Palpite: {guessA || 0} x {guessB || 0}</div>
+              </div>
+              
+              {!actuallyLocked && (
+                <div className="flex items-center gap-1 text-[9px] font-bold text-gray-500 uppercase tracking-tighter">
+                  <Target className="w-3 h-3 text-yellow-500/50" /> Insira seu placar
+                </div>
+              )}
             </div>
           )}
         </div>
 
         {/* Team B */}
-        <div className="flex flex-col items-center flex-1">
-          <div className="w-12 h-12 flex items-center justify-center text-4xl mb-2 drop-shadow-md">
-            {teamB.flag}
+        <div className="flex flex-col items-center flex-1 space-y-3">
+          <div className="relative group/flag">
+            <div className="absolute -inset-2 bg-yellow-500/20 rounded-full blur-xl opacity-0 group-hover/flag:opacity-100 transition-opacity" />
+            <span className="text-5xl drop-shadow-2xl relative z-10">{teamB.flag}</span>
           </div>
-          <span className="font-bold text-sm text-gray-800 dark:text-gray-200 text-center uppercase tracking-wide line-clamp-1">
+          <span className="font-black text-xs text-white uppercase tracking-tighter text-center">
             {teamB.name}
           </span>
         </div>
       </div>
 
+      {/* Save Button */}
       <AnimatePresence>
         {!actuallyLocked && hasChanged && (
           <motion.div
             initial={{ height: 0, opacity: 0, marginTop: 0 }}
-            animate={{ height: "auto", opacity: 1, marginTop: 16 }}
+            animate={{ height: "auto", opacity: 1, marginTop: 24 }}
             exit={{ height: 0, opacity: 0, marginTop: 0 }}
             className="overflow-hidden"
           >
             <Button 
               onClick={handleSave} 
               disabled={isSaving}
-              className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold transition-colors shadow-lg shadow-emerald-900/10"
+              className="w-full h-12 bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-400 hover:to-yellow-500 text-black font-black uppercase tracking-widest text-[10px] rounded-xl shadow-[0_10px_20px_rgba(234,179,8,0.2)]"
             >
-              {isSaving ? <Loader2 className="w-5 h-5 animate-spin" /> : <><Check className="w-4 h-4 mr-2" /> Salvar Palpite</>}
+              {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <><Check className="w-4 h-4 mr-2" /> Confirmar Palpite</>}
             </Button>
           </motion.div>
         )}
       </AnimatePresence>
+      
+      {actuallyLocked && !isFinished && (
+        <div className="mt-6 flex items-center justify-center gap-2 text-[10px] font-black text-gray-500 uppercase tracking-widest">
+           <Lock className="w-3 h-3" /> Apostas Trancadas
+        </div>
+      )}
     </motion.div>
   );
 }

@@ -2,12 +2,9 @@ import db from "@/lib/db";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { redirect } from "next/navigation";
+import { User, Mail, History, Award, CheckCircle2, XCircle, Info } from "lucide-react";
 
-// Sub-componente para os cards de UI do shadcn que talvez não existam ainda
-// Vou usar divs estilizadas para garantir que nada quebre caso shadcn card não esteja instalado
 export default async function ProfilePage() {
   const session = await getServerSession(authOptions);
 
@@ -18,7 +15,7 @@ export default async function ProfilePage() {
   const user = await db("users").where({ email: session.user?.email }).first();
   
   if (!user) {
-    return <div className="p-8 text-white">Usuário não encontrado.</div>;
+    return <div className="p-8 text-white font-black uppercase tracking-widest text-center mt-20">Usuário não encontrado.</div>;
   }
 
   const guesses = await db("guesses")
@@ -36,68 +33,103 @@ export default async function ProfilePage() {
     .orderBy("matches.date", "desc");
 
   return (
-    <div className="flex flex-col p-4 pb-20 space-y-6">
-      <header className="py-10 flex flex-col items-center">
-        <Avatar className="h-24 w-24 border-4 border-white/20 shadow-xl mb-4">
-          <AvatarImage src={session.user?.image || ""} />
-          <AvatarFallback className="text-2xl font-bold bg-emerald-600 text-white">
-            {session.user?.name?.substring(0, 2).toUpperCase() || "U"}
-          </AvatarFallback>
-        </Avatar>
-        <h1 className="text-2xl font-black text-white drop-shadow-md">
-          {session.user?.name}
-        </h1>
-        <p className="text-emerald-100/70 text-sm font-medium">
-          {session.user?.email}
-        </p>
+    <div className="flex flex-col gap-10 py-6 px-4 md:px-0 max-w-5xl mx-auto">
+      {/* Header do Perfil - Style Hero */}
+      <header className="relative overflow-hidden rounded-[3rem] bg-[#121212] border border-white/5 p-8 md:p-12 flex flex-col md:flex-row items-center gap-10">
+        <div className="absolute top-0 right-0 p-12 opacity-5">
+           <User size={150} className="text-white" />
+        </div>
+        
+        <div className="relative z-10">
+          <div className="relative group">
+            <div className="absolute -inset-2 bg-yellow-500 blur-2xl opacity-20 group-hover:opacity-40 transition-opacity rounded-full" />
+            <Avatar className="h-32 w-32 border-4 border-yellow-500/30 relative z-10">
+              <AvatarImage src={session.user?.image || ""} />
+              <AvatarFallback className="text-3xl font-black bg-black text-white">
+                {session.user?.name?.substring(0, 2).toUpperCase() || "U"}
+              </AvatarFallback>
+            </Avatar>
+          </div>
+        </div>
+
+        <div className="relative z-10 flex flex-col items-center md:items-start text-center md:text-left">
+           <h1 className="text-4xl font-black text-white uppercase tracking-tighter mb-2">
+             {session.user?.name}
+           </h1>
+           <div className="flex items-center gap-2 text-gray-400 font-medium mb-6">
+              <Mail size={14} className="text-yellow-500/50" />
+              <span className="text-sm">{session.user?.email}</span>
+           </div>
+
+           <div className="flex items-center gap-4">
+              <div className="bg-white/5 px-4 py-2 rounded-2xl border border-white/5 flex flex-col items-center min-w-[100px]">
+                 <span className="text-[9px] font-black text-gray-500 uppercase tracking-widest mb-1">Palpites</span>
+                 <span className="text-xl font-black text-white">{guesses.length}</span>
+              </div>
+              <div className="bg-yellow-500/10 px-4 py-2 rounded-2xl border border-yellow-500/10 flex flex-col items-center min-w-[100px]">
+                 <span className="text-[9px] font-black text-yellow-500/60 uppercase tracking-widest mb-1">Pontos</span>
+                 <span className="text-xl font-black text-yellow-500">
+                   {guesses.reduce((sum, g) => sum + (g.points_earned || 0), 0)}
+                 </span>
+              </div>
+           </div>
+        </div>
       </header>
 
-      <section className="space-y-4">
-        <h2 className="text-lg font-bold text-white px-2">Seus últimos palpites</h2>
+      {/* Histórico de Palpites - Style List Premium */}
+      <section className="space-y-6">
+        <div className="flex items-center gap-3 px-2">
+           <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center border border-white/5">
+              <History className="text-blue-500" size={20} />
+           </div>
+           <h2 className="text-2xl font-black text-white uppercase tracking-tight">Histórico de Atividade</h2>
+        </div>
         
-        <div className="flex flex-col gap-3">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {guesses.map((guess) => {
             const isProcessed = guess.points_earned !== null;
             
             return (
-              <div key={guess.id} className="bg-white/95 dark:bg-gray-900 shadow-lg rounded-2xl p-4 border border-white/10">
-                <div className="flex items-center justify-between mb-3 border-b border-gray-100 dark:border-gray-800 pb-2">
-                  <span className="text-[10px] font-bold uppercase text-gray-400">
+              <div key={guess.id} className="bg-[#0d0d0d] border border-white/5 p-6 rounded-[2rem] transition-all hover:border-white/10 group">
+                <div className="flex items-center justify-between mb-6">
+                  <div className="bg-white/5 px-3 py-1 rounded-full text-[9px] font-black text-gray-500 uppercase tracking-widest">
                     {guess.team_a} vs {guess.team_b}
-                  </span>
+                  </div>
                   
                   {isProcessed ? (
-                    <span className={`text-[10px] font-black px-2 py-0.5 rounded-full uppercase ${
+                    <div className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-tighter ${
                       guess.points_earned === 3 
-                        ? "bg-green-100 text-green-700" 
+                        ? "bg-green-500/20 text-green-500" 
                         : guess.points_earned === 1 
-                          ? "bg-blue-100 text-blue-700" 
-                          : "bg-gray-100 text-gray-400"
+                          ? "bg-blue-500/20 text-blue-500" 
+                          : "bg-gray-500/20 text-gray-500"
                     }`}>
+                      {guess.points_earned === 3 ? <CheckCircle2 size={12} /> : guess.points_earned === 1 ? <Info size={12} /> : <XCircle size={12} />}
                       {guess.points_earned} {guess.points_earned === 1 ? 'Ponto' : 'Pontos'}
-                    </span>
+                    </div>
                   ) : (
-                    <span className="text-[10px] font-bold text-gray-300 uppercase">Aguardando</span>
+                    <span className="text-[9px] font-black text-gray-600 uppercase tracking-widest italic tracking-widest">Aguardando...</span>
                   )}
                 </div>
 
-                <div className="flex items-center justify-center gap-4">
-                  <div className="flex items-center gap-2">
-                    <span className="text-lg">{guess.team_a_flag}</span>
-                    <span className="text-xl font-bold text-gray-800 dark:text-gray-100">{guess.guess_a}</span>
+                <div className="flex items-center justify-center gap-8 py-2">
+                  <div className="flex flex-col items-center gap-2">
+                    <span className="text-3xl">{guess.team_a_flag}</span>
+                    <span className="text-2xl font-black text-white">{guess.guess_a}</span>
                   </div>
                   
-                  <span className="text-gray-300 font-bold">X</span>
+                  <div className="h-8 w-[1px] bg-white/10" />
                   
-                  <div className="flex items-center gap-2">
-                    <span className="text-xl font-bold text-gray-800 dark:text-gray-100">{guess.guess_b}</span>
-                    <span className="text-lg">{guess.team_b_flag}</span>
+                  <div className="flex flex-col items-center gap-2">
+                    <span className="text-3xl">{guess.team_b_flag}</span>
+                    <span className="text-2xl font-black text-white">{guess.guess_b}</span>
                   </div>
                 </div>
 
                 {isProcessed && (
-                  <div className="mt-3 text-center text-[9px] font-bold text-gray-400 border-t border-gray-50 pt-2">
-                    Resultado Real: {guess.real_a} x {guess.real_b}
+                  <div className="mt-6 flex flex-col items-center gap-1 opacity-50 group-hover:opacity-100 transition-opacity">
+                    <div className="text-[8px] font-bold text-gray-500 uppercase tracking-widest">Resultado do Jogo</div>
+                    <div className="text-sm font-black text-white">{guess.real_a} : {guess.real_b}</div>
                   </div>
                 )}
               </div>
@@ -105,9 +137,12 @@ export default async function ProfilePage() {
           })}
 
           {guesses.length === 0 && (
-            <div className="p-8 text-center text-emerald-100/50 italic border border-dashed border-emerald-100/20 rounded-2xl">
-              Você ainda não fez nenhum palpite. 
-              Corra para a página inicial!
+            <div className="col-span-full py-20 text-center bg-[#121212]/50 border border-dashed border-white/5 rounded-[2.5rem] flex flex-col items-center gap-4">
+              <Award size={48} className="text-gray-700" />
+              <div className="flex flex-col gap-1">
+                 <p className="text-gray-500 font-bold uppercase tracking-widest text-xs">Nenhum palpite enviado</p>
+                 <p className="text-gray-600 font-medium text-[10px]">As estatísticas aparecerão assim que você começar a jogar.</p>
+              </div>
             </div>
           )}
         </div>
