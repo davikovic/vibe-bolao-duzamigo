@@ -13,10 +13,11 @@ import { cn } from "@/lib/utils";
 export default async function AdminPage({
   searchParams,
 }: {
-  searchParams: { tab?: string };
+  searchParams: Promise<{ tab?: string }>;
 }) {
+  const params = await searchParams;
   const session = await getServerSession(authOptions);
-  const activeTab = searchParams.tab || "matches";
+  const activeTab = params.tab || "matches";
 
   // Proteção Robustecida
   if (!session || session.user?.email !== process.env.ADMIN_EMAIL) {
