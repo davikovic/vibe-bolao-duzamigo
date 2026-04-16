@@ -24,7 +24,15 @@ export default async function AdminPage({
   }
 
   const matches = await db("matches").select("*").orderBy("date", "desc");
-  const pendingUsers = await db("users").where({ status: "pending" }).select("id", "name", "email", "image");
+  const pendingUsers = await db("users")
+    .where({ status: "pending" })
+    .select("id", "name", "email", "image", "role");
+  
+  const activeUsers = await db("users")
+    .where({ status: "active" })
+    .whereNot({ email: process.env.ADMIN_EMAIL }) // Ocultamos o admin principal para evitar erros
+    .select("id", "name", "email", "image", "role");
+
   const pools = await db("pools").select("id", "name");
 
   return (
@@ -113,7 +121,11 @@ export default async function AdminPage({
           </div>
         </div>
       ) : (
-        <ApproveUsersTab pendingUsers={pendingUsers} pools={pools} />
+        <ApproveUsersTab 
+          pendingUsers={pendingUsers} 
+          activeUsers={activeUsers}
+          pools={pools} 
+        />
       )}
     </div>
   );

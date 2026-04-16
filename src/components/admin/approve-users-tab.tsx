@@ -6,12 +6,15 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { approveUserAction } from "@/app/actions/admin_approval";
+import { toggleAdminRoleAction } from "@/app/actions/admin_role";
+import { Shield, ShieldAlert, ShieldCheck as ShieldIcon, ShieldCheck } from "lucide-react";
 
 interface PendingUser {
   id: number;
   name: string;
   email: string;
   image: string | null;
+  role: "admin" | "user";
 }
 
 interface Pool {
@@ -21,11 +24,13 @@ interface Pool {
 
 interface ApproveUsersTabProps {
   pendingUsers: PendingUser[];
+  activeUsers: PendingUser[];
   pools: Pool[];
 }
 
-export function ApproveUsersTab({ pendingUsers, pools }: ApproveUsersTabProps) {
+export function ApproveUsersTab({ pendingUsers, activeUsers, pools }: ApproveUsersTabProps) {
   const [loadingId, setLoadingId] = useState<number | null>(null);
+  const [roleLoadingId, setRoleLoadingId] = useState<number | null>(null);
   const [selectedPools, setSelectedPools] = useState<Record<number, number>>(
     Object.fromEntries(pendingUsers.map(u => [u.id, pools[0]?.id]))
   );
@@ -49,6 +54,22 @@ export function ApproveUsersTab({ pendingUsers, pools }: ApproveUsersTabProps) {
       toast.error("Erro interno.");
     } finally {
       setLoadingId(null);
+    }
+  };
+
+  const handleToggleRole = async (userId: number) => {
+    setRoleLoadingId(userId);
+    try {
+      const res = await toggleAdminRoleAction(userId);
+      if (res.success) {
+        toast.success(`Usuário agora é ${res.newRole === "admin" ? "Administrador" : "Usuário Comum"}`);
+      } else {
+        toast.error(res.error || "Erro ao alterar papel.");
+      }
+    } catch (error) {
+      toast.error("Erro interno.");
+    } finally {
+      setRoleLoadingId(null);
     }
   };
 
@@ -115,10 +136,69 @@ export function ApproveUsersTab({ pendingUsers, pools }: ApproveUsersTabProps) {
              </div>
              <div className="space-y-1">
                 <p className="text-gray-500 font-bold uppercase tracking-widest text-xs">Nenhuma solicitação pendente</p>
-                <p className="text-gray-600 font-medium text-[10px]">Tudo limpo por aqui, Comandante!</p>
+                <p className="text-gray-600 font-medium text-[10px]">Novos jogadores aparecerão aqui.</p>
              </div>
           </div>
         )}
+      </div>
+
+      {/* Seção de Usuários Ativos / Gestão de Admins */}
+      <div className="pt-10 border-t border-white/5">
+        <div className="flex items-center gap-3 mb-8 px-2">
+          <ShieldIcon className="text-blue-500" size={20} />
+          <h2 className="text-xl font-black text-white uppercase tracking-tight">Gerenciar Permissões</h2>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {activeUsers.map((user) => (
+            <div 
+              key={user.id} 
+              className="bg-[#121212]/50 border border-white/5 p-5 rounded-[2rem] flex items-center justify-between gap-4 transition-all hover:bg-[#121212]"
+            >
+              <div className="flex items-center gap-3 min-w-0">
+                 <Avatar className="h-10 w-10 border border-white/10">
+                   <AvatarImage src={user.image || ""} />
+                   <AvatarFallback className="bg-black text-white text-[10px] font-black">
+                     {user.name.substring(0, 2).toUpperCase()}
+                   </AvatarFallback>
+                 </Avatar>
+                 <div className="flex flex-col min-w-0">
+                    <div className="flex items-center gap-1.5 min-w-0">
+                       <span className="text-sm font-black text-white truncate">{user.name}</span>
+                       {user.role === "admin" && (
+                          <div className="bg-yellow-500/10 p-0.5 rounded-md border border-yellow-500/20 shadow-[0_0_10px_rgba(234,179,8,0.1)]">
+                             <Shield size={10} className="text-yellow-500" fill="currentColor" />
+                          </div>
+                       )}
+                    </div>
+                    <span className="text-[10px] font-medium text-gray-600 truncate">{user.email}</span>
+                 </div>
+              </div>
+
+              <Button
+                variant="ghost"
+                size="sm"
+                disabled={roleLoadingId === user.id}
+                onClick={() => handleToggleRole(user.id)}
+                className={`h-9 px-4 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all ${
+                  user.role === "admin" 
+                    ? "bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white border border-red-500/20" 
+                    : "bg-blue-500/10 text-blue-500 hover:bg-blue-500 hover:text-white border border-blue-500/20"
+                }`}
+              >
+                {roleLoadingId === user.id 
+                  ? "Aguarde..." 
+                  : user.role === "admin" ? "Remover Admin" : "Tornar Admin"}
+              </Button>
+            </div>
+          ))}
+
+          {activeUsers.length === 0 && (
+            <div className="col-span-full p-10 text-center text-gray-600 font-bold uppercase tracking-widest text-[10px]">
+               Nenhum usuário ativo para gerenciar.
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

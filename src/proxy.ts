@@ -32,7 +32,14 @@ export async function proxy(request: NextRequest) {
     }
   }
 
-  // 4. Se o usuário estiver ACTIVE e tentar acessar /pending, levar para home
+  // 4. Bloquear acesso ao /admin se não for admin
+  if (pathname.startsWith("/admin")) {
+    if (token.role !== "admin") {
+      return NextResponse.redirect(new URL("/", request.url));
+    }
+  }
+
+  // 5. Se o usuário estiver ACTIVE e tentar acessar /pending, levar para home
   if (token.status === "active") {
     if (pathname === "/pending") {
       return NextResponse.redirect(new URL("/", request.url));

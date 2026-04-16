@@ -52,7 +52,8 @@ export const authOptions: NextAuthOptions = {
           name: user.name,
           email: user.email,
           image: user.image,
-          status: isGlobalAdmin ? 'active' : 'pending'
+          status: isGlobalAdmin ? 'active' : 'pending',
+          role: isGlobalAdmin ? 'admin' : 'user'
         });
       } else {
         // Atualiza imagem ou nome se mudou no provedor social
@@ -60,6 +61,7 @@ export const authOptions: NextAuthOptions = {
           name: user.name,
           image: user.image,
           status: isGlobalAdmin ? 'active' : existingUser.status, // Garante que admin sempre seja ativo
+          role: isGlobalAdmin ? 'admin' : existingUser.role, // Garante que admin sempre tenha role correta
           updated_at: db.fn.now(),
         });
       }
@@ -68,12 +70,14 @@ export const authOptions: NextAuthOptions = {
     async jwt({ token, user, trigger, session }) {
       if (user) {
         token.status = (user as any).status;
+        token.role = (user as any).role;
       }
       
-      // Busca status atualizado do banco se necessário
+      // Busca dados atualizados do banco se necessário
       const dbUser = await db("users").where({ email: token.email }).first();
       if (dbUser) {
         token.status = dbUser.status;
+        token.role = dbUser.role;
         token.id = dbUser.id;
         
         // Busca o ID do primeiro bolão aprovado
@@ -90,6 +94,7 @@ export const authOptions: NextAuthOptions = {
       if (session.user) {
         (session.user as any).id = token.id;
         (session.user as any).status = token.status;
+        (session.user as any).role = token.role;
         (session.user as any).poolId = token.poolId;
       }
       return session;
