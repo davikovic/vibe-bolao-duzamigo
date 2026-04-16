@@ -2,15 +2,16 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, Trophy, Users, User, LayoutDashboard, Settings, LogOut } from "lucide-react";
+import { Home, Trophy, Users, User, LayoutDashboard, Settings, LogOut, Search } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { signOut, useSession } from "next-auth/react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { PoolSwitcher } from "./pool-switcher";
 
 const navItems = [
   { href: "/", label: "Início", icon: Home },
-  { href: "/", label: "Bolão", icon: LayoutDashboard }, // Linkando para a home por enquanto
   { href: "/ranking", label: "Ranking", icon: Trophy },
+  { href: "/pools/explore", label: "Explorar", icon: Search },
   { href: "/profile", label: "Meu Perfil", icon: User },
 ];
 
@@ -33,6 +34,8 @@ export function Sidebar() {
           </div>
         </div>
       </div>
+
+      <PoolSwitcher />
 
       {session?.user && (
         <div className="px-6 mb-6">

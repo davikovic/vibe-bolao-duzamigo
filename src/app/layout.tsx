@@ -22,11 +22,17 @@ export const metadata: Metadata = {
   description: "O dashboard de apostas definitivo da Copa",
 };
 
-export default function RootLayout({
+import { cookies } from "next/headers";
+
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const cookieStore = await cookies();
+  const activePoolId = cookieStore.get("active-pool-id")?.value;
+  const initialPoolId = activePoolId ? Number(activePoolId) : null;
+
   return (
     <html
       lang="pt-BR"
@@ -34,7 +40,7 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased dark`}
     >
       <body className="min-h-full flex flex-col md:flex-row bg-[#0a0a0a] text-white">
-        <Providers>
+        <Providers initialPoolId={initialPoolId}>
           <LayoutDynamic>
             {children}
           </LayoutDynamic>

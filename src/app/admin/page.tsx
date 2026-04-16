@@ -29,6 +29,20 @@ export default async function AdminPage({
   const pendingUsers = await db("users")
     .where({ status: "pending" })
     .select("id", "name", "email", "image", "role");
+
+  const pendingMemberships = await db("pool_memberships")
+    .join("users", "pool_memberships.user_id", "users.id")
+    .join("pools", "pool_memberships.pool_id", "pools.id")
+    .where({ "pool_memberships.status": "pending" })
+    .select(
+      "pool_memberships.id as id",
+      "users.id as userId",
+      "users.name as name",
+      "users.email as email",
+      "users.image as image",
+      "pools.name as poolName",
+      "pools.id as poolId"
+    );
   
   const activeUsers = await db("users")
     .where({ status: "active" })
@@ -136,6 +150,7 @@ export default async function AdminPage({
       {activeTab === "users" && (
         <ApproveUsersTab 
           pendingUsers={pendingUsers} 
+          pendingMemberships={pendingMemberships}
           activeUsers={activeUsers}
           pools={pools} 
         />

@@ -44,6 +44,12 @@ export async function proxy(request: NextRequest) {
     if (pathname === "/pending") {
       return NextResponse.redirect(new URL("/", request.url));
     }
+
+    // REGRA MULTI-BOLÃO: Se não tem poolId, mandar para explorar (exceto admin e perfil)
+    const isAllowedWithoutPool = pathname === "/pools/explore" || pathname.startsWith("/admin") || pathname === "/profile";
+    if (!token.poolId && !isAllowedWithoutPool) {
+      return NextResponse.redirect(new URL("/pools/explore", request.url));
+    }
   }
 
   return NextResponse.next();

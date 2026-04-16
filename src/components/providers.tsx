@@ -1,11 +1,20 @@
 "use client";
 
 import { SessionProvider } from "next-auth/react";
+import { PoolProvider } from "@/components/providers/pool-provider";
 
-export function Providers({ children }: { children: React.ReactNode }) {
+export function Providers({ 
+  children, 
+  initialPoolId 
+}: { 
+  children: React.ReactNode;
+  initialPoolId: number | null;
+}) {
   return (
     <SessionProvider>
-      {children}
+      <PoolProvider initialPoolId={initialPoolId}>
+        {children}
+      </PoolProvider>
     </SessionProvider>
   );
 }

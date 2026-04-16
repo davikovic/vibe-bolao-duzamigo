@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Trophy, Medal, Star, TrendingUp, Users } from "lucide-react";
+import { cookies } from "next/headers";
 
 interface RankingUser {
   id: number;
@@ -13,7 +14,9 @@ interface RankingUser {
 
 export default async function RankingPage() {
   const session = await getServerSession(authOptions);
-  const poolId = (session?.user as any)?.poolId;
+  const cookieStore = await cookies();
+  const activePoolId = cookieStore.get("active-pool-id")?.value;
+  const poolId = activePoolId ? Number(activePoolId) : (session?.user as any)?.poolId;
   
   let ranking: RankingUser[] = [];
   let poolName = "Geral";

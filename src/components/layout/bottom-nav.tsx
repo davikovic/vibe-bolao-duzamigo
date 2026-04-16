@@ -1,6 +1,6 @@
 "use client";
 
-import { Home, Trophy, LayoutDashboard, User } from "lucide-react";
+import { Home, Trophy, Search, User } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
@@ -9,7 +9,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 const navItems = [
   { id: "home", href: "/", label: "Início", icon: Home },
-  { id: "game", href: "/", label: "Bolão", icon: LayoutDashboard },
+  { id: "explore", href: "/pools/explore", label: "Explorar", icon: Search },
   { id: "ranking", href: "/ranking", label: "Ranking", icon: Trophy },
   { id: "profile", href: "/profile", label: "Perfil", icon: User },
 ];

@@ -3,6 +3,7 @@ import db from "@/lib/db";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { Trophy, Timer, Zap, Flame, Info } from "lucide-react";
+import { cookies } from "next/headers";
 
 const MOCK_GAMES = [
   {
@@ -44,7 +45,9 @@ export default async function Home() {
 
   try {
     const session = await getServerSession(authOptions);
-    const poolId = (session?.user as any)?.poolId;
+    const cookieStore = await cookies();
+    const activePoolId = cookieStore.get("active-pool-id")?.value;
+    const poolId = activePoolId ? Number(activePoolId) : (session?.user as any)?.poolId;
 
     if (poolId) {
       const pool = await db("pools").where({ id: poolId }).first();
