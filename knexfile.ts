@@ -13,7 +13,10 @@ dotenvConfig({ path: envPath });
 const config: { [key: string]: Knex.Config } = {
   development: {
     client: "pg",
-    connection: process.env.DATABASE_URL,
+    connection: {
+      connectionString: process.env.DATABASE_URL?.split('?')[0],
+      ssl: { rejectUnauthorized: false },
+    },
     pool: {
       min: 2,
       max: 10
@@ -28,7 +31,10 @@ const config: { [key: string]: Knex.Config } = {
   },
   production: {
     client: "pg",
-    connection: process.env.DATABASE_URL,
+    connection: {
+      connectionString: process.env.DATABASE_URL?.split('?')[0],
+      ssl: { rejectUnauthorized: false }, // Muitas vezes necessário para conexões externas na Vercel
+    },
     pool: {
       min: 2,
       max: 10
