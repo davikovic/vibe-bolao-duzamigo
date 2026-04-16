@@ -3,7 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { redirect } from "next/navigation";
-import { User, Mail, History, Award, CheckCircle2, XCircle, Info } from "lucide-react";
+import { User, Mail, History, Award, CheckCircle2, XCircle, Info, Loader2, Target } from "lucide-react";
 
 export default async function ProfilePage() {
   const session = await getServerSession(authOptions);
@@ -32,6 +32,9 @@ export default async function ProfilePage() {
     )
     .orderBy("matches.date", "desc");
 
+  const totalPoints = guesses.reduce((sum, g) => sum + (g.points_earned || 0), 0);
+  const avatarUrl = session.user?.image || `https://api.dicebear.com/7.x/bottts/svg?seed=${session.user?.email || 'default'}`;
+
   return (
     <div className="flex flex-col gap-10 py-6 px-4 md:px-0 max-w-5xl mx-auto">
       {/* Header do Perfil - Style Hero */}
@@ -43,8 +46,8 @@ export default async function ProfilePage() {
         <div className="relative z-10">
           <div className="relative group">
             <div className="absolute -inset-2 bg-yellow-500 blur-2xl opacity-20 group-hover:opacity-40 transition-opacity rounded-full" />
-            <Avatar className="h-32 w-32 border-4 border-yellow-500/30 relative z-10">
-              <AvatarImage src={session.user?.image || ""} />
+            <Avatar className="h-32 w-32 border-4 border-yellow-500/30 relative z-10 shadow-[0_0_30px_rgba(234,179,8,0.3)]">
+              <AvatarImage src={avatarUrl} className="object-cover" />
               <AvatarFallback className="text-3xl font-black bg-black text-white">
                 {session.user?.name?.substring(0, 2).toUpperCase() || "U"}
               </AvatarFallback>
@@ -69,7 +72,7 @@ export default async function ProfilePage() {
               <div className="bg-yellow-500/10 px-4 py-2 rounded-2xl border border-yellow-500/10 flex flex-col items-center min-w-[100px]">
                  <span className="text-[9px] font-black text-yellow-500/60 uppercase tracking-widest mb-1">Pontos</span>
                  <span className="text-xl font-black text-yellow-500">
-                   {guesses.reduce((sum, g) => sum + (g.points_earned || 0), 0)}
+                   {totalPoints}
                  </span>
               </div>
            </div>
@@ -90,16 +93,21 @@ export default async function ProfilePage() {
             const isProcessed = guess.points_earned !== null;
             
             return (
-              <div key={guess.id} className="bg-[#0d0d0d] border border-white/5 p-6 rounded-[2rem] transition-all hover:border-white/10 group">
-                <div className="flex items-center justify-between mb-6">
-                  <div className="bg-white/5 px-3 py-1 rounded-full text-[9px] font-black text-gray-500 uppercase tracking-widest">
-                    {guess.team_a} vs {guess.team_b}
+              <div key={guess.id} className="bg-[#121212]/60 backdrop-blur-xl border border-white/5 p-6 rounded-[2rem] transition-all hover:border-white/10 group relative overflow-hidden">
+                <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
+                   <Target size={40} className="text-white" />
+                </div>
+
+                <div className="flex items-center justify-between mb-8 relative z-10">
+                  <div className="flex items-center gap-2">
+                     <div className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
+                     <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">Palpite Confirmado</span>
                   </div>
                   
                   {isProcessed ? (
                     <div className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-tighter ${
                       guess.points_earned === 3 
-                        ? "bg-green-500/20 text-green-500" 
+                        ? "bg-green-500/20 text-green-500 shadow-[0_0_15px_rgba(34,197,94,0.1)]" 
                         : guess.points_earned === 1 
                           ? "bg-blue-500/20 text-blue-500" 
                           : "bg-gray-500/20 text-gray-500"
@@ -108,28 +116,48 @@ export default async function ProfilePage() {
                       {guess.points_earned} {guess.points_earned === 1 ? 'Ponto' : 'Pontos'}
                     </div>
                   ) : (
-                    <span className="text-[9px] font-black text-gray-600 uppercase tracking-widest italic tracking-widest">Aguardando...</span>
+                    <span className="text-[9px] font-black text-yellow-500/40 uppercase tracking-widest flex items-center gap-1.5">
+                       <Loader2 size={10} className="animate-spin" /> Aguardando Resultado
+                    </span>
                   )}
                 </div>
 
-                <div className="flex items-center justify-center gap-8 py-2">
-                  <div className="flex flex-col items-center gap-2">
-                    <span className="text-3xl">{guess.team_a_flag}</span>
-                    <span className="text-2xl font-black text-white">{guess.guess_a}</span>
+                <div className="flex items-center justify-between gap-4 mb-2 relative z-10">
+                  {/* Team A */}
+                  <div className="flex flex-col items-center flex-1 gap-3">
+                    <div className="w-12 h-8 rounded-sm overflow-hidden border border-white/10 bg-black/40 shadow-lg">
+                      <img src={guess.team_a_flag} alt={guess.team_a} className="w-full h-full object-cover" />
+                    </div>
+                    <span className="text-[10px] font-black text-white uppercase tracking-tighter text-center line-clamp-1">{guess.team_a}</span>
                   </div>
-                  
-                  <div className="h-8 w-[1px] bg-white/10" />
-                  
-                  <div className="flex flex-col items-center gap-2">
-                    <span className="text-3xl">{guess.team_b_flag}</span>
-                    <span className="text-2xl font-black text-white">{guess.guess_b}</span>
+
+                  {/* Guess Display */}
+                  <div className="flex flex-col items-center gap-1 min-w-[80px]">
+                     <span className="text-[8px] font-bold text-gray-600 uppercase tracking-widest">Palpite</span>
+                     <div className="flex items-center gap-3 bg-black/40 px-4 py-1.5 rounded-xl border border-white/5">
+                        <span className="text-xl font-black text-white">{guess.guess_a}</span>
+                        <span className="text-yellow-500 text-xs font-bold">:</span>
+                        <span className="text-xl font-black text-white">{guess.guess_b}</span>
+                     </div>
+                  </div>
+
+                  {/* Team B */}
+                  <div className="flex flex-col items-center flex-1 gap-3">
+                    <div className="w-12 h-8 rounded-sm overflow-hidden border border-white/10 bg-black/40 shadow-lg">
+                      <img src={guess.team_b_flag} alt={guess.team_b} className="w-full h-full object-cover" />
+                    </div>
+                    <span className="text-[10px] font-black text-white uppercase tracking-tighter text-center line-clamp-1">{guess.team_b}</span>
                   </div>
                 </div>
 
                 {isProcessed && (
-                  <div className="mt-6 flex flex-col items-center gap-1 opacity-50 group-hover:opacity-100 transition-opacity">
-                    <div className="text-[8px] font-bold text-gray-500 uppercase tracking-widest">Resultado do Jogo</div>
-                    <div className="text-sm font-black text-white">{guess.real_a} : {guess.real_b}</div>
+                  <div className="mt-8 pt-4 border-t border-white/5 flex items-center justify-between transition-opacity relative z-10 text-[10px] font-bold">
+                    <span className="text-gray-500 uppercase tracking-widest">Placar Oficial</span>
+                    <div className="flex items-center gap-2">
+                       <span className="text-white bg-white/5 px-2 py-0.5 rounded-md">{guess.real_a}</span>
+                       <span className="text-yellow-500/50">:</span>
+                       <span className="text-white bg-white/5 px-2 py-0.5 rounded-md">{guess.real_b}</span>
+                    </div>
                   </div>
                 )}
               </div>

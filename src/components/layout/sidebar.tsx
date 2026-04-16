@@ -4,7 +4,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Home, Trophy, Users, User, LayoutDashboard, Settings, LogOut } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { signOut } from "next-auth/react";
+import { signOut, useSession } from "next-auth/react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 const navItems = [
   { href: "/", label: "Início", icon: Home },
@@ -15,6 +16,9 @@ const navItems = [
 
 export function Sidebar() {
   const pathname = usePathname();
+  const { data: session } = useSession();
+
+  const avatarUrl = session?.user?.image || `https://api.dicebear.com/7.x/bottts/svg?seed=${session?.user?.email || 'default'}`;
 
   return (
     <aside className="hidden md:flex flex-col w-64 bg-[#0d0d0d] border-r border-white/5 h-screen sticky top-0 z-40">
@@ -29,6 +33,29 @@ export function Sidebar() {
           </div>
         </div>
       </div>
+
+      {session?.user && (
+        <div className="px-6 mb-6">
+          <Link 
+            href="/profile" 
+            className="flex items-center gap-3 p-3 rounded-2xl bg-white/5 border border-white/5 hover:border-yellow-500/20 transition-all group"
+          >
+            <div className="relative">
+              <div className="absolute -inset-1 bg-yellow-500/20 rounded-full blur-md opacity-0 group-hover:opacity-100 transition-opacity" />
+              <Avatar className="h-10 w-10 border border-yellow-500/30 relative z-10 shadow-[0_0_10px_rgba(234,179,8,0.2)]">
+                <AvatarImage src={avatarUrl} className="object-cover" />
+                <AvatarFallback className="text-xs font-black bg-black text-white">
+                  {session.user.name?.substring(0, 2).toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
+            </div>
+            <div className="flex flex-col overflow-hidden">
+              <span className="text-xs font-black text-white truncate">{session.user.name}</span>
+              <span className="text-[9px] font-bold text-gray-500 truncate">{session.user.email}</span>
+            </div>
+          </Link>
+        </div>
+      )}
 
       <nav className="flex-1 px-4 space-y-2 mt-4">
         {navItems.map((item) => {
