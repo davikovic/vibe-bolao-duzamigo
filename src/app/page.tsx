@@ -96,6 +96,7 @@ export default async function Home() {
           const dateStr = `${day}/${month} ${hours}:${minutes}`;
 
           const isLocked = new Date() > gameDate;
+          const isFinished = game.score_a !== null && game.score_b !== null;
 
           return (
             <GameCard
@@ -108,6 +109,9 @@ export default async function Home() {
               initialGuessA={userGuessesMap[game.id]?.a}
               initialGuessB={userGuessesMap[game.id]?.b}
               isLocked={isLocked}
+              isFinished={isFinished}
+              finalScoreA={game.score_a}
+              finalScoreB={game.score_b}
             />
           );
         })}

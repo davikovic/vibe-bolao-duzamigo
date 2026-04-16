@@ -17,7 +17,7 @@ export function BottomNav() {
           <Trophy className="w-6 h-6 mb-1" />
           <span className="text-[10px] font-medium">Ranking</span>
         </Link>
-        <Link href="#" className="flex flex-col items-center justify-center w-full h-full text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-500 transition-colors">
+        <Link href="/profile" className="flex flex-col items-center justify-center w-full h-full text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-500 transition-colors">
           <User className="w-6 h-6 mb-1" />
           <span className="text-[10px] font-medium">Perfil</span>
         </Link>

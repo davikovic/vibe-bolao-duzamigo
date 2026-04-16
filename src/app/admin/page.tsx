@@ -1,8 +1,18 @@
 import db from "@/lib/db";
 import { AdminMatchRow } from "@/components/admin-match-row";
 import { Trophy } from "lucide-react";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { redirect } from "next/navigation";
 
 export default async function AdminPage() {
+  const session = await getServerSession(authOptions);
+
+  // Trava de Segurança: Apenas o e-mail definido no .env pode acessar
+  if (!session || session.user?.email !== process.env.ADMIN_EMAIL) {
+    redirect("/");
+  }
+
   const matches = await db("matches").select("*").orderBy("date", "desc");
 
   return (
