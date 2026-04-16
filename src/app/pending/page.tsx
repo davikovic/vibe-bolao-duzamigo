@@ -1,8 +1,8 @@
-import { Timer, LogOut, Clock, ShieldAlert } from "lucide-react";
+import { Clock } from "lucide-react";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { redirect } from "next/navigation";
-import { SignOutButton } from "@/components/auth/sign-out-button";
+import { PendingActions } from "@/components/auth/pending-actions";
 
 export default async function PendingPage() {
   const session = await getServerSession(authOptions);
@@ -11,10 +11,8 @@ export default async function PendingPage() {
     redirect("/login");
   }
 
-  // Se o usuário já foi aprovado, redireciona para a home
-  if ((session.user as any).status === "active") {
-    redirect("/");
-  }
+  // O middleware cuidará do acesso à home quando o JWT for atualizado.
+  const isActive = (session.user as any).status === "active";
 
   return (
     <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center p-6 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]">
@@ -36,20 +34,11 @@ export default async function PendingPage() {
             Seu cadastro foi recebido com sucesso. Por motivos de segurança, novos participantes precisam ser aprovados manualmente pela organização do Bolão.
           </p>
 
-          <div className="w-full space-y-4">
-             <div className="bg-white/5 p-4 rounded-2xl border border-white/5 flex items-center gap-4 text-left">
-                <ShieldAlert className="text-yellow-500/50 shrink-0" size={20} />
-                <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest leading-relaxed">
-                   Você receberá acesso assim que um administrador confirmar seu vínculo com o grupo.
-                </p>
-             </div>
-
-             <SignOutButton />
-          </div>
+          <PendingActions isActive={isActive} />
 
           <div className="mt-12 pt-8 border-t border-white/5 w-full">
              <p className="text-[10px] font-black text-gray-600 uppercase tracking-[0.3em]">
-                Status: <span className="text-yellow-500/60 ml-2">Aguardando Aprovação</span>
+                Status: <span className="text-yellow-500/60 ml-2">{isActive ? "Aprovado!" : "Aguardando Aprovação"}</span>
              </p>
           </div>
         </div>

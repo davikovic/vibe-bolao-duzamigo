@@ -73,19 +73,26 @@ export const authOptions: NextAuthOptions = {
         token.role = (user as any).role;
       }
       
-      // Busca dados atualizados do banco se necessário
-      const dbUser = await db("users").where({ email: token.email }).first();
-      if (dbUser) {
-        token.status = dbUser.status;
-        token.role = dbUser.role;
-        token.id = dbUser.id;
-        
-        // Busca o ID do primeiro bolão aprovado
-        const membership = await db("pool_memberships")
-          .where({ user_id: dbUser.id, status: 'approved' })
-          .first();
-        if (membership) {
-          token.poolId = membership.pool_id;
+      // Busca dados atualizados do banco se necessário (Somente em ambiente Node/Server)
+      // O Middleware (Edge Runtime) usará o status persistido no JWT
+      if (process.env.NEXT_RUNTIME !== "edge") {
+        try {
+          const dbUser = await db("users").where({ email: token.email }).first();
+          if (dbUser) {
+            token.status = dbUser.status;
+            token.role = dbUser.role;
+            token.id = dbUser.id;
+            
+            // Busca o ID do primeiro bolão aprovado
+            const membership = await db("pool_memberships")
+              .where({ user_id: dbUser.id, status: 'approved' })
+              .first();
+            if (membership) {
+              token.poolId = membership.pool_id;
+            }
+          }
+        } catch (error) {
+          console.error("Erro ao atualizar token no JWT callback:", error);
         }
       }
       return token;
