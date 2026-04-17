@@ -29,8 +29,8 @@ const FLAG_CODES: any = {
   "Japan": "jp", "Sweden": "se", "Tunisia": "tn", "Belgium": "be",
   "Egypt": "eg", "Iran": "ir", "New Zealand": "nz", "Spain": "es",
   "Cape Verde": "cv", "Saudi Arabia": "sa", "Uruguay": "uy",
-  "France": "fr", "Senegal": "sn", "Norway": "no", "Argentina": "ar",
-  "Algeria": "dz", "Austria": "at", "Jordan": "jo", "Portugal": "pt",
+  "France": "fr", "Norway": "no",
+  "Algeria": "dz", "Austria": "at", "Jordan": "jo",
   "DR Congo": "cd", "Uzbekistan": "uz", "Colombia": "co", "England": "gb-eng",
   "Croatia": "hr", "Ghana": "gh", "Panama": "pa", "Playoff Winner 2": "xx",
   "Iraq": "iq"
