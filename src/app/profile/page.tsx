@@ -4,6 +4,7 @@ import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { redirect } from "next/navigation";
 import { User, Mail, History, Award, CheckCircle2, XCircle, Info, Loader2, Target } from "lucide-react";
+import { SignOutButton } from "@/components/auth/sign-out-button";
 
 export default async function ProfilePage() {
   const session = await getServerSession(authOptions);
@@ -75,6 +76,11 @@ export default async function ProfilePage() {
                    {totalPoints}
                  </span>
               </div>
+           </div>
+
+           {/* Botão de Logout apenas Mobile */}
+           <div className="w-full mt-6 md:hidden">
+              <SignOutButton />
            </div>
         </div>
       </header>
