@@ -1,6 +1,6 @@
 <div align="center">
   <br />
-  <img src="https://flagcdn.com/w160/us.png" alt="FIFA World Cup 2026 Preview" width="60"/>
+  <img src="https://flagcdn.com/w160/br.png" alt="FIFA World Cup 2026 Preview" width="60"/>
   <h1>✨ Bolão Duzamigo</h1>
   <p><strong>A Plataforma Gamificada Definitiva para a Copa do Mundo 2026</strong></p>
   <p>Construída com Next.js 16, UI Premium e uma Inteligência Artificial poderosa.</p>
