@@ -116,8 +116,12 @@ export function GameCard({
               <div className="flex items-center gap-2 bg-black/20 p-1.5 rounded-2xl border border-white/5 shadow-inner">
                 <Input 
                   type="number" 
+                  min="0"
                   value={guessA}
-                  onChange={(e) => setGuessA(e.target.value)}
+                  onChange={(e) => {
+                    if (parseInt(e.target.value) < 0) return;
+                    setGuessA(e.target.value);
+                  }}
                   disabled={actuallyLocked || isSaving}
                   className="w-12 h-12 text-center text-xl font-black bg-white/5 border-none focus-visible:ring-yellow-500 disabled:opacity-100 rounded-xl"
                   placeholder="?"
@@ -125,8 +129,12 @@ export function GameCard({
                 <div className="w-1 h-1 bg-yellow-500/50 rounded-full" />
                 <Input 
                   type="number" 
+                  min="0"
                   value={guessB}
-                  onChange={(e) => setGuessB(e.target.value)}
+                  onChange={(e) => {
+                    if (parseInt(e.target.value) < 0) return;
+                    setGuessB(e.target.value);
+                  }}
                   disabled={actuallyLocked || isSaving}
                   className="w-12 h-12 text-center text-xl font-black bg-white/5 border-none focus-visible:ring-yellow-500 disabled:opacity-100 rounded-xl"
                   placeholder="?"

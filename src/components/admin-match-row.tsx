@@ -58,16 +58,24 @@ export function AdminMatchRow({ id, teamA, teamB, teamAFlag, teamBFlag, initialS
         <div className="flex items-center gap-3 bg-black/40 p-1.5 rounded-2xl border border-white/5">
           <Input 
             type="number" 
+            min="0"
             value={scoreA}
-            onChange={(e) => setScoreA(e.target.value)}
+            onChange={(e) => {
+              if (parseInt(e.target.value) < 0) return;
+              setScoreA(e.target.value);
+            }}
             className="w-12 h-10 text-center font-black bg-white/5 border-none focus-visible:ring-yellow-500 rounded-xl"
             placeholder="-"
           />
           <span className="text-yellow-500/50 font-black text-xs">VS</span>
           <Input 
             type="number" 
+            min="0"
             value={scoreB}
-            onChange={(e) => setScoreB(e.target.value)}
+            onChange={(e) => {
+              if (parseInt(e.target.value) < 0) return;
+              setScoreB(e.target.value);
+            }}
             className="w-12 h-10 text-center font-black bg-white/5 border-none focus-visible:ring-yellow-500 rounded-xl"
             placeholder="-"
           />

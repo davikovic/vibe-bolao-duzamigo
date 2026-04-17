@@ -58,7 +58,7 @@ export default async function Home() {
       }
     }
 
-    const result = await db("matches").select("*").orderBy("date", "asc");
+    const result = await db("matches").whereNull("score_a").select("*").orderBy("date", "asc");
     if (result && result.length > 0) {
       matches = result;
 

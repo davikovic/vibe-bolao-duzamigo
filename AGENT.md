@@ -1,44 +1,52 @@
-# AGENT.md - Protocolo Único do Desenvolvedor
+🎯 Objetivo do Projeto
+Construir uma Plataforma de Bolão Multi-Tenant para a Copa do Mundo.
 
-## 🎯 Objetivo do Projeto
-Construir um Web App de **Bolão para a Copa do Mundo**.
-- **Foco:** Mobile-first (perfeito no celular).
-- **Social:** Diversão entre amigos com ranking e palpites.
-- **Hospedagem:** Vercel (Gratuito).
+Foco: Mobile-first com estética "Dark Gold" (RubinOT style).
 
-## 🤖 Perfil do Agente
-Você é um Engenheiro de Software Full Stack Sênior. Sua missão é guiar o desenvolvimento de forma educativa, garantindo código limpo e realizando a gestão do projeto via Git.
+Escala: Suporte a múltiplos grupos (bolões) independentes com isolamento total.
 
-## 🛠 Stack Tecnológica (Obrigatória)
-- **Framework:** Next.js 14+ (App Router).
-- **Linguagem:** TypeScript.
-- **Estilização:** Tailwind CSS + Shadcn/ui.
-- **Componentes UI:** 21st.dev (Magic UI / Aceternity).
-- **Banco de Dados:** PostgreSQL (Vercel Postgres ou Supabase - Tier Grátis).
-- **Query Builder:** Knex.js.
+Hospedagem: Vercel (Gratuito).
 
-## 📋 Regras de Execução e Comportamento
+🛠 Stack Tecnológica (Obrigatória)
+Framework: Next.js 14+ (App Router).
 
-### 1. Gestão de Versão (Git)
-- Você DEVE realizar um commit após cada tarefa concluída com sucesso.
-- Use **Conventional Commits** em português (Ex: `feat: cria tabela de palpites`).
-- Nunca acumule muitas alterações sem commitar.
+Autenticação: NextAuth.js (Google, GitHub e Credentials com Bcrypt).
 
-### 2. Fluxo de Trabalho
-- **Mobile-First:** Toda interface deve ser pensada primeiro para telas pequenas.
-- **Configuração de Banco:** Use Migrations com Knex.js para qualquer alteração no esquema.
-- **Deploy:** O projeto deve estar sempre pronto para o deploy na Vercel. Documente variáveis de ambiente necessárias no `.env.example`.
+Banco de Dados: PostgreSQL (Vercel/Supabase) via Knex.js.
 
-### 3. Integração 21st.dev
-- Quando solicitado um componente "legalzinho", busque referências no 21st.dev que usem Tailwind e Framer Motion.
-- Garanta que as dependências do componente sejam instaladas antes da implementação.
+Estilização: Tailwind CSS + Shadcn/ui + Framer Motion.
 
-### 4. Lógica de Negócio Inicial
-- Sistema de pontos: 3 pontos para placar exato, 1 ponto para acertar apenas o ganhador/empate.
-- Bloqueio de palpites: 30 minutos antes do início de cada partida.
+Segurança: Middleware de proteção e Proxy de rotas baseado em Roles.
 
-## 🚀 Instruções de Inicialização
-Ao ler este arquivo pela primeira vez, execute:
-1. `git init`
-2. Criação do projeto Next.js com as configurações da Stack.
-3. Primeiro commit: `chore: initial commit do projeto bolão`.
+👑 Hierarquia de Permissões
+Admin Global: Acesso total (Cria bolões, gerencia resultados globais, promove moderadores).
+
+Moderador de Bolão: Gerencia apenas os membros do seu próprio bolão (Aprova/Remove).
+
+Membro: Realiza palpites e visualiza o ranking do seu bolão ativo.
+
+📋 Regras de Negócio e Comportamento
+1. Gestão de Dados e UI
+Multi-Bolão: Todas as queries de ranking e jogos devem filtrar por pool_id.
+
+Sincronização: Os jogos são globais, mas liberados para palpites por Rodadas via interface administrativa.
+
+Validations: Proibido placares negativos. Bloqueio de palpites 30min antes do jogo.
+
+Avatares: Use DiceBear (seed=email) como fallback para usuários sem foto de rede social.
+
+2. Fluxo de Trabalho
+Conventional Commits: Realize um commit após cada tarefa concluída com sucesso.
+
+Mobile-First: Priorize a usabilidade em telas pequenas (BottomNav no mobile, Sidebar no Desktop).
+
+Isolamento de Login: A tela de login deve ser limpa, sem elementos de navegação do dashboard.
+
+🚀 O Plano de Ação para o Novo Agente
+Agora, você pode passar as seguintes instruções para o Agente na conta nova:
+
+Analise o Projeto: "Analise todo o código atual para entender a implementação do Multi-Bolão, o middleware de segurança e o sistema de moderadores."
+
+Leia o Protocolo: "Leia o AGENT.md atualizado para absorver as novas regras de hierarquia e stack."
+
+Sprint Final: "Com base no código e no protocolo, execute a última sprint do nextSprint.md (Rebranding, Reset de Banco, Modal de Sync por Rodadas e Filtro de Home)."

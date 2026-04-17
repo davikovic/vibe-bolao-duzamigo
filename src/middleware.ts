@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
 import type { NextRequest } from "next/server";
 
-export async function proxy(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   const token = await getToken({ req: request });
   const { pathname } = request.nextUrl;
 
@@ -17,12 +17,9 @@ export async function proxy(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // 2. Se não estiver logado, redirecionar para login (opcional, já que NextAuth pode lidar com isso, mas bom para /pending)
+  // 2. Se não estiver logado, redirecionar IMEDIATAMENTE para login
   if (!token) {
-    if (pathname === "/pending") {
-      return NextResponse.redirect(new URL("/login", request.url));
-    }
-    return NextResponse.next();
+    return NextResponse.redirect(new URL("/login", request.url));
   }
 
   // 3. Se o usuário estiver PENDING, só pode acessar /pending e /api/auth

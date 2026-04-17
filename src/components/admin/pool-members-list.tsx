@@ -5,7 +5,7 @@ import { ShieldHalf, ShieldMinus, User, Loader2, Users } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { toggleModeratorAction, getPoolApprovedMembers } from "@/app/actions/moderator_actions";
+import { toggleModeratorAction, getPoolApprovedMembers, removeMemberAction } from "@/app/actions/moderator_actions";
 
 interface Member {
   membershipId: number;
@@ -112,6 +112,27 @@ export function PoolMembersList({ poolId, poolName }: PoolMembersListProps) {
             ) : (
               <span className="flex items-center gap-1"><ShieldHalf size={12} /> Moderador</span>
             )}
+          </Button>
+
+          <Button
+            size="sm"
+            onClick={async () => {
+              if (window.confirm(`Tem certeza que deseja remover ${member.name}?`)) {
+                setLoadingId(member.membershipId);
+                const res = await removeMemberAction(member.membershipId, poolId);
+                if (res.success) {
+                  toast.success("Membro removido.");
+                  setMembers(prev => prev.filter(m => m.membershipId !== member.membershipId));
+                } else {
+                  toast.error(res.error || "Erro.");
+                }
+                setLoadingId(null);
+              }
+            }}
+            disabled={loadingId === member.membershipId}
+            className="h-8 px-2 rounded-xl text-[9px] font-black uppercase text-red-500 bg-red-500/10 hover:bg-red-500/20 hover:text-red-400 border border-red-500/20 hover:border-red-500/40"
+          >
+            remover
           </Button>
         </div>
       ))}

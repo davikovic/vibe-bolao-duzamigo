@@ -172,3 +172,33 @@ export async function toggleModeratorAction(membershipId: number, poolId: number
     return { error: "Erro interno." };
   }
 }
+
+/** Remove um membro aprovado do bolão (Acesso: Admin ou Moderador). */
+export async function removeMemberAction(membershipId: number, poolId: number) {
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.email) return { error: "Não autorizado" };
+
+  const user = await db("users").where({ email: session.user.email }).first();
+  if (!user) return { error: "Usuário não encontrado" };
+
+  const isGlobalAdmin = user.role === "admin";
+  if (!isGlobalAdmin) {
+    const modMembership = await db("pool_memberships").where({
+      user_id: user.id,
+      pool_id: poolId,
+      role: "moderator",
+      status: "approved",
+    }).first();
+    if (!modMembership) return { error: "Sem permissão para remover membros" };
+  }
+
+  try {
+    await db("pool_memberships").where({ id: membershipId, pool_id: poolId }).delete();
+    revalidatePath(`/pools/${poolId}/manage`);
+    revalidatePath("/admin");
+    return { success: true };
+  } catch (error) {
+    console.error("Erro ao remover membro:", error);
+    return { error: "Erro interno" };
+  }
+}
