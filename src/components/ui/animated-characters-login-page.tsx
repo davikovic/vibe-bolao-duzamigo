@@ -322,7 +322,7 @@ export function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen grid lg:grid-cols-2">
+    <div className="w-full min-h-screen grid lg:grid-cols-2 bg-[#0a0a0a]">
       {/* Left Content Section */}
       <div className="relative hidden lg:flex flex-col justify-between bg-gradient-to-br from-blue-600 via-blue-500 to-blue-400 p-12 text-primary-foreground">
         <div className="relative z-20">
@@ -482,11 +482,11 @@ export function LoginPage() {
       </div>
 
       {/* Right Login Section */}
-      <div className="flex items-center justify-center p-8 bg-background">
+      <div className="flex items-center justify-center p-8 bg-[#0a0a0a]">
         <div className="w-full max-w-[420px]">
-          <div className="lg:hidden flex items-center justify-center gap-2 text-xl font-bold text-gray-800 mb-12">
-            <div className="size-8 rounded-lg bg-blue-600/10 flex items-center justify-center">
-              <Sparkles className="size-4 text-blue-600" />
+          <div className="lg:hidden flex items-center justify-center gap-2 text-xl font-bold text-white mb-12">
+            <div className="size-8 rounded-lg bg-yellow-500/10 flex items-center justify-center">
+              <Sparkles className="size-4 text-yellow-500" />
             </div>
             <span>Bolão Duzamigo</span>
           </div>

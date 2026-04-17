@@ -10,7 +10,7 @@ export function LayoutDynamic({ children }: { children: React.ReactNode }) {
 
   if (isLoginPage) {
     return (
-      <main className="w-full min-h-screen flex items-center justify-center bg-[#0a0a0a]">
+      <main className="w-full min-h-screen bg-[#0a0a0a] overflow-hidden">
         {children}
       </main>
     );
